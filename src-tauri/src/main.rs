@@ -6,6 +6,10 @@ use std::error::Error;
 use std::fs::File;
 use std::io::Write;
 
+#[tauri::command]
+fn greet(name: &str) -> String {
+    format!("Hello, {}! You've been greeted from Rust!", name)
+}
 #[derive(Serialize, Deserialize)]  // <-- Add Deserialize if you plan to deserialize
 struct Record {
     columns: HashMap<String, Value>,
@@ -121,14 +125,10 @@ fn csv_to_json(file_path: &str, output_path: &str) -> Result<(), Box<dyn Error>>
     );
     Ok(())
 }
-fn main() {
-    // Example usage: filter for rows between time intervals
-    let file_path = "bf.csv";
-    let output_path = "n.json";
-    let start_time = 1745117;
-    let end_time=1745475; // Filter time range
 
-    if let Err(e) = csv_to_json_in_time(file_path, output_path, start_time, end_time) {
-        eprintln!("Error: {}", e);
-    }
+fn main() {
+    tauri::Builder::default()
+        .invoke_handler(tauri::generate_handler![greet])
+        .run(tauri::generate_context!())
+        .expect("error while running tauri application");
 }
