@@ -8,8 +8,13 @@ function App() {
   const [name, setName] = useState("");
 
   async function greet() {
-    // Learn more about Tauri commands at https://tauri.app/v1/guides/features/command
-    setGreetMsg(await invoke("greet", { name }));
+    try {
+      // Correct invocation of the `getshit` function, passing starttime and endtime
+      const response = await invoke("getshit", { starttime: 1745117, endtime: 1745475 });
+      setGreetMsg(response);
+    } catch (error) {
+      console.error("Error invoking getshit command:", error);
+    }
   }
 
   return (
@@ -39,7 +44,11 @@ function App() {
       >
         <input
           id="greet-input"
-          onChange={(e) => setName(e.currentTarget.value)}
+          onChange={(e) => {
+            console.log("Changing name");
+            console.log(e.currentTarget.value);
+            setName(e.currentTarget.value);
+          }}
           placeholder="Enter a name..."
         />
         <button type="submit">Greet</button>

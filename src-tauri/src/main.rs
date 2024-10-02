@@ -1,17 +1,22 @@
-use csv::ReaderBuilder;
-use serde::{Serialize, Deserialize};  // <-- Import both Serialize and Deserialize
 use serde_json::Value;
+use tauri::api::file;
 use std::collections::HashMap;
 use std::error::Error;
 use std::fs::File;
-use std::io::Write;
+use std::io::Read;
+use csv::ReaderBuilder;
+use serde::Serialize;
 
-#[derive(Serialize, Deserialize)]  // <-- Add Deserialize if you plan to deserialize
+#[derive(Debug, Serialize)]
 struct Record {
     columns: HashMap<String, Value>,
 }
 
-fn csv_to_json_in_time(file_path: &str, output_path: &str, start_time: i64, end_time: i64) -> Result<(), Box<dyn Error>> {
+fn csv_to_json_in_time(
+    file_path: &str,
+    start_time: i64,
+    end_time: i64
+) -> Result<String, Box<dyn Error>> {
     // Open the CSV file
     let file = File::open(file_path)?;
     let mut rdr = ReaderBuilder::new().from_reader(file);
@@ -21,7 +26,7 @@ fn csv_to_json_in_time(file_path: &str, output_path: &str, start_time: i64, end_
 
     // Collect records dynamically based on headers
     let mut records: Vec<Record> = Vec::new();
-    
+
     for result in rdr.records() {
         let record = result?;
         let mut row_data = HashMap::new();
@@ -62,73 +67,43 @@ fn csv_to_json_in_time(file_path: &str, output_path: &str, start_time: i64, end_
         }
     }
 
-    // Convert records to JSON
+    // Convert records to JSON and return it
     let json_data = serde_json::to_string_pretty(&records)?;
-
-    // Write JSON data to the output file
-    let mut file = File::create(output_path)?;
-    file.write_all(json_data.as_bytes())?;
-
-    println!(
-        "Filtered CSV data successfully converted to JSON and saved to {}",
-        output_path
-    );
-    Ok(())
+    
+    Ok(json_data) // Return the JSON data instead of writing to a file
 }
-fn csv_to_json(file_path: &str, output_path: &str) -> Result<(), Box<dyn Error>> {
-    // Open the CSV file
-    let file = File::open(file_path)?;
-    let mut rdr = ReaderBuilder::new().from_reader(file);
 
-    // Get the headers (first row of the CSV)
-    let headers = rdr.headers()?.clone();
 
-    // Collect records dynamically based on headers
-    let mut records: Vec<Record> = Vec::new();
-    for result in rdr.records() {
-        let record = result?;
-        let mut row_data = HashMap::new();
+// fn main() -> Result<(), Box<dyn Error>> {
+//     let file_path = "bf.csv";
+//     // let output_path = "n.json";
+//     let start_time = 1745117;
+//     let end_time=1745475;
+//     let json_data = csv_to_json_in_time(&file_path, start_time, end_time)?; // Example start and end times
+//     println!("{}", json_data); // Print or send to frontend
 
-        // Map each header to its corresponding value in the row
-        for (i, header) in headers.iter().enumerate() {
-            let value = &record[i];
+//     Ok(())
+// }
 
-            // Try to parse the value as an integer first, then as a float
-            let parsed_value = if let Ok(int_value) = value.parse::<i64>() {
-                Value::from(int_value) // Store as integer
-            } else if let Ok(float_value) = value.parse::<f64>() {
-                Value::from(float_value) // Store as float
-            } else {
-                Value::from(value.to_string()) // Store as string if not a number
-            };
 
-            row_data.insert(header.to_string(), parsed_value);
-        }
 
-        records.push(Record { columns: row_data });
-    }
+// #[command]
+// use std::error::Error;
+use tauri::command;
 
-    // Convert records to JSON
-    let json_data = serde_json::to_string_pretty(&records)?;
-
-    // Write JSON data to the output file
-    let mut file = File::create(output_path)?;
-    file.write_all(json_data.as_bytes())?;
-
-    println!(
-        "CSV data successfully converted to JSON and saved to {}",
-        output_path
-    );
-    Ok(())
-}
-fn main() {
-    // Example usage: filter for rows between time intervals
+#[command]
+fn getshit(starttime: i64, endtime: i64) -> Result<String, String> {
     let file_path = "bf.csv";
-    let output_path = "n.json";
-    let start_time = 1745117;
-    let end_time=1745475; // Filter time range
-
-    if let Err(e) = csv_to_json_in_time(file_path, output_path, start_time, end_time) {
-        eprintln!("Error: {}", e);
+    
+    match csv_to_json_in_time(&file_path, starttime, endtime) {
+        Ok(json_data) => Ok(json_data), 
+        Err(e) => Err(format!("Error: {}", e)), // Convert error to a string
     }
+}
+
+fn main() {
+    tauri::Builder::default()
+        .invoke_handler(tauri::generate_handler![getshit])
+        .run(tauri::generate_context!())
+        .expect("error while running tauri application");
 }
