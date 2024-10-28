@@ -10,8 +10,8 @@ function App() {
   const [greetMsg2, setGreetMsg2] = useState([]); // Initial empty array for data
 
   const [name, setName] = useState("");
-  const [startTime, setStartTime] = useState(1744); // Initial start time
-  const [endTime, setEndTime] = useState(1755800); // Initial end time
+  const [startTime, setStartTime] = useState(0); // Initial start time
+  const [endTime, setEndTime] = useState(100); // Initial end time
   const [loading, setLoading] = useState(false); // Track loading state
 
   async function fetchTelemetryData() {
@@ -68,11 +68,15 @@ function App() {
         {/* <Graph data2DArray={greetMsg} fetchMoreData={fetchTelemetryData} loading={loading} var1="accelX" var2="accelY" var3="accelZ" /> */}
       </div>
       <div>
-        Tabular data is
-        {greetMsg2}
+        <div>
+        second data
+        </div>
+    
+        {greetMsg2[8]}
       </div>
     </>
   );
 }
+
 
 export default App;
