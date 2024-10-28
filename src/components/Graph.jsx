@@ -82,7 +82,7 @@ const Graph = ({ data2DArray, var1, var2, var3, fetchMoreData, loading }) => {
                             type: 'linear',
                             title: { display: true, text: 'Time' },
                             min: Math.max(0, chartData.labels[chartData.labels.length - 1] - 2000), // Keep showing the last 2000 units
-                            max: chartData.labels[chartData.labels.length - 1] || 2000,
+                            max: chartData.labels[chartData.labels.length - 1] ,
                             ticks: {
                                 callback: function(value) {
                                     return Number(value).toFixed(0); // Remove decimals for readability
