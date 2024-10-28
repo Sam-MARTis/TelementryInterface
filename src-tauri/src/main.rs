@@ -4,6 +4,10 @@ use std::error::Error;
 use std::fs::File;
 use csv::ReaderBuilder;
 use serde::Serialize;
+use std::fs::OpenOptions;
+use std::io::{self, BufRead, Write};
+use std::path::Path;
+use std::process::{Command};
 
 #[derive(Debug, Serialize)]
 struct Record {
@@ -62,9 +66,69 @@ fn getdata1(starttime: i64, endtime: i64) -> Result<Vec<Vec<String>>, String> {
     Ok(records)
 }
 
+#[tauri::command]
+fn getdata2(starttime: i64, endtime: i64) -> Result<Vec<Vec<String>>, String> {
+    let file_path = "bs.csv";
+    let records = csv_to_array_in_time(&file_path, starttime, endtime)
+        .map_err(|e| e.to_string())?;
+    Ok(records)
+}
+
+
+fn empty_csv_except_first_row(file_path: &str) -> io::Result<()> {
+    let path = Path::new(file_path);
+    
+    // Open the file in read mode
+    let file = OpenOptions::new().read(true).open(&path)?;
+    let reader = io::BufReader::new(file);
+    
+    // Read the first line (header)
+    let first_line = reader.lines().next().unwrap_or(Ok(String::new()))?;
+    
+    // Open the file in write mode to truncate it
+    let mut file = OpenOptions::new()
+        .write(true)
+        .truncate(true)
+        .open(&path)?;
+    
+    // Write the first line back to the file
+    writeln!(file, "{}", first_line)?;
+    
+    Ok(())
+}
+
 fn main() {
+
+        let files = ["bs.csv", "bf.csv"];
+        
+        for file in &files {
+            match empty_csv_except_first_row(file) {
+                Ok(()) => println!("Successfully emptied the CSV file: {}", file),
+                Err(e) => eprintln!("Failed to empty the CSV file {}: {}", file, e),
+            }
+        }
+
+        let second_project_executable = "/home/odin/Code/Tele/arduino_read/target/release/arduino_read"; // Adjust the path as neededcd
+
+        // Start the second project in the background
+        let mut child = Command::new(second_project_executable)
+            .spawn()
+            .expect("Failed to start the second project");
+    
+        println!("Second proje started with PID: {}", child.id());
+    
+        // You can continue with other tasks in the first project
+        // ...
+    
+        // Optionally wait for the second project to finish (if needed)
+        // let _ = child.wait().expect("Child process wasn't running");
+
+
+
+
+
     tauri::Builder::default()
-        .invoke_handler(tauri::generate_handler![getdata1])
+        .invoke_handler(tauri::generate_handler![getdata1, getdata2])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }
