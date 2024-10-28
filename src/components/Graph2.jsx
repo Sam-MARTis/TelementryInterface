@@ -32,9 +32,9 @@ const Graph = ({ data2DArray, var1, var2, var3, fetchMoreData, loading }) => {
             if (index < data2DArray.length) {
                 const currentData = data2DArray[index];
                 const time = Math.round(currentData[1]); // Round to nearest integer or format as needed
-                const value1 = currentData[7];
-                const value2 = currentData[8];
-                const value3 = currentData[9];
+                const value1 = currentData[12];
+                const value2 = currentData[12];
+                const value3 = currentData[14];
 
                 setChartData((prevData) => {
                     const updatedLabels = [...prevData.labels, time];
@@ -64,7 +64,7 @@ const Graph = ({ data2DArray, var1, var2, var3, fetchMoreData, loading }) => {
 
     return (
         <div>
-            <h2>Second sensor data</h2>
+            <h2>BS FILES</h2>
             <Line
                 data={chartData}
                 options={{

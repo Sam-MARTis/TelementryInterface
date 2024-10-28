@@ -64,7 +64,7 @@ const Graph = ({ data2DArray, var1, var2, var3, fetchMoreData, loading }) => {
 
     return (
         <div>
-            <h2>Multiple Sensor Data</h2>
+            <h2>BF files</h2>
             <Line
                 data={chartData}
                 options={{
