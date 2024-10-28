@@ -70,6 +70,7 @@ const Graph = ({ data2DArray, var1, var2, var3, fetchMoreData, loading }) => {
                 data={chartData}
                 options={{
                     responsive: true,
+                
                     plugins: {
                         legend: { display: true },
                         title: {
