@@ -45,7 +45,7 @@ const Port = () => {
   return (
     <div className={`port-container ${theme}`}>
       {/* <h2>Select Port</h2> */}
-      <select className="port-dropdown" value={selectedPort} onChange={handlePortChange}>
+      <select className="port-dropdown " value={selectedPort} onChange={handlePortChange}>
         <option value="" disabled>
           Choose a port
         </option>

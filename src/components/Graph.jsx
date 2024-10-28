@@ -25,13 +25,13 @@ const Graph = ({ data2DArray, var1, var2, var3, fetchMoreData, loading }) => {
         })),
     });
 
-    const [time, setTime] = useState(0);
     const [index, setIndex] = useState(0); // To track the current data index
 
     useEffect(() => {
         const interval = setInterval(() => {
             if (index < data2DArray.length) {
                 const currentData = data2DArray[index];
+                const time = Math.round(currentData[1]); // Round to nearest integer or format as needed
                 const value1 = currentData[12];
                 const value2 = currentData[13];
                 const value3 = currentData[14];
@@ -50,7 +50,6 @@ const Graph = ({ data2DArray, var1, var2, var3, fetchMoreData, loading }) => {
                     };
                 });
 
-                setTime((prevTime) => prevTime + 1);
                 setIndex((prevIndex) => prevIndex + 1);
 
                 // If about to run out of data, trigger a fetch for more
@@ -61,7 +60,7 @@ const Graph = ({ data2DArray, var1, var2, var3, fetchMoreData, loading }) => {
         }, 100);
 
         return () => clearInterval(interval);
-    }, [index, time, data2DArray, fetchMoreData, loading]);
+    }, [index, data2DArray, fetchMoreData, loading]);
 
     return (
         <div>
@@ -69,8 +68,8 @@ const Graph = ({ data2DArray, var1, var2, var3, fetchMoreData, loading }) => {
             <Line
                 data={chartData}
                 options={{
+                    animation: false,
                     responsive: true,
-                
                     plugins: {
                         legend: { display: true },
                         title: {
@@ -82,8 +81,13 @@ const Graph = ({ data2DArray, var1, var2, var3, fetchMoreData, loading }) => {
                         x: {
                             type: 'linear',
                             title: { display: true, text: 'Time' },
-                            min: time - 100,
-                            max: time,
+                            min: Math.max(0, chartData.labels[chartData.labels.length - 1] - 2000), // Keep showing the last 2000 units
+                            max: chartData.labels[chartData.labels.length - 1] || 2000,
+                            ticks: {
+                                callback: function(value) {
+                                    return Number(value).toFixed(0); // Remove decimals for readability
+                                },
+                            },
                         },
                         y: {
                             title: { display: true, text: 'Magnitude' },

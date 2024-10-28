@@ -23,7 +23,7 @@ function App() {
       
       // Adjust the startTime and endTime for next fetch
       const nextStartTime = endTime;
-      const nextEndTime = endTime + 50; // Increment by certain number 
+      const nextEndTime = endTime + 10; // Increment by certain number 
       setStartTime(nextStartTime);
       setEndTime(nextEndTime);
 
